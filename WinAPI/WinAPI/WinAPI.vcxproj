@@ -78,7 +78,7 @@
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
@@ -92,7 +92,7 @@
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
@@ -105,7 +105,7 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
@@ -120,7 +120,7 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
@@ -130,6 +130,7 @@
     <ClInclude Include="framework\Game.h" />
     <ClInclude Include="content\GameState.h" />
     <ClInclude Include="content\Monster.h" />
+    <ClInclude Include="framework\inc_windows.h" />
     <ClInclude Include="framework\pch.h" />
     <ClInclude Include="content\Player.h" />
     <ClInclude Include="content\PlayerState.h" />
@@ -138,15 +139,15 @@
     <ClInclude Include="framework\Singleton.h" />
     <ClInclude Include="framework\targetver.h" />
     <ClInclude Include="framework\Types.h" />
-    <ClInclude Include="framework\WinAPI.h" />
+    <ClInclude Include="framework\wndBase.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="content\AStar.cpp" />
     <ClCompile Include="framework\Game.cpp" />
-    <ClCompile Include="main.cpp" />
+    <ClCompile Include="content\main.cpp" />
     <ClCompile Include="content\Monster.cpp" />
     <ClCompile Include="content\Player.cpp" />
-    <ClCompile Include="framework\WinAPI.cpp" />
+    <ClCompile Include="framework\wndBase.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource\WinAPI.rc" />

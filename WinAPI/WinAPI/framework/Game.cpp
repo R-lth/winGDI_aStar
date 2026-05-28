@@ -1,249 +1,354 @@
 ﻿#include "Game.h"
 #include "Resource.h"
 
-void Game::init(HWND hWnd, RECT rect)
+namespace monkeyEngine
 {
-    width = rect.right - rect.left;
-    height = rect.bottom - rect.top;
+    void Game::Run()
+    {
+        Create(L"GameWindowClass", L"Client", 400, 400);
 
-    // 몬스터 생성 위치 관련 랜덤 값을 위한 함수
-    srand(time(NULL));
+        RECT rcClient = {};
+        GetClientRect(m_hWnd, &rcClient);
 
-    // 타이머
-    SetTimer(hWnd, 1, 150 * 2, NULL);
-    SetTimer(hWnd, 2, 1500, NULL);
-    SetTimer(hWnd, 3, 150, NULL);
-}
+        width = rcClient.right - rcClient.left;
+        height = rcClient.bottom - rcClient.top;
 
-void Game::update(HWND hWnd, WPARAM wParam)
-{
-    switch (wParam)
-    {
-    case 1:
-    {
-        monster.move(hWnd);
+        m_hFrontDC = GetDC(m_hWnd);
+
+        init();
+
+        LARGE_INTEGER frequency = {};
+        LARGE_INTEGER previousCount = {};
+        LARGE_INTEGER currentCount = {};
+
+        QueryPerformanceFrequency(&frequency);
+        QueryPerformanceCounter(&previousCount);
+
+        MSG msg = {};
+
+        while (isRun)
+        {
+            while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
+            {
+                if (msg.message == WM_QUIT)
+                {
+                    isRun = false;
+                    break;
+                }
+
+                TranslateMessage(&msg);
+                DispatchMessage(&msg);
+            }
+
+            QueryPerformanceCounter(&currentCount);
+
+            float deltaTime =
+                static_cast<float>(currentCount.QuadPart - previousCount.QuadPart) /
+                static_cast<float>(frequency.QuadPart);
+
+            if (deltaTime < 1.0f / 120.0f)
+                continue;
+
+            previousCount = currentCount;
+
+            input();
+            update(deltaTime);
+            render();
+        }
+
+        ReleaseDC(m_hWnd, m_hFrontDC);
+        m_hFrontDC = nullptr;
+
+        Destroy();
     }
-    break;
-    case 2:
+
+    void Game::init()
     {
-        monster.spawn();
+        srand(static_cast<unsigned int>(time(nullptr)));
     }
-    break;
-    case 3:
+
+    void Game::input()
     {
-        player.shoot();
+        if (GameState::Get().gameOver || GameState::Get().waiting)
+            return;
+
+        bool wasd[4] = {};
+        wasd[0] = GetAsyncKeyState('W') & 0x8000;
+        wasd[1] = GetAsyncKeyState('A') & 0x8000;
+        wasd[2] = GetAsyncKeyState('S') & 0x8000;
+        wasd[3] = GetAsyncKeyState('D') & 0x8000;
+
+        bool arrow[4] = {};
+        arrow[0] = GetAsyncKeyState(VK_UP) & 0x8000;
+        arrow[1] = GetAsyncKeyState(VK_LEFT) & 0x8000;
+        arrow[2] = GetAsyncKeyState(VK_DOWN) & 0x8000;
+        arrow[3] = GetAsyncKeyState(VK_RIGHT) & 0x8000;
+
+        if (wasd[0] || wasd[1] || wasd[2] || wasd[3])
+            player.move(wasd);
+
+        if (arrow[0] || arrow[1] || arrow[2] || arrow[3])
+            player.loadingBullets(arrow);
+
+        if (GetAsyncKeyState(VK_ESCAPE) & 0x8000)
+            isRun = false;
     }
-    break;
-    // 충돌 시
-    case 4:
+
+    void Game::update(float deltaTime)
     {
-        KillTimer(hWnd, 4);
+        monsterMoveTimer += deltaTime;
+        monsterSpawnTimer += deltaTime;
+        bulletShootTimer += deltaTime;
+
+        if (monsterMoveTimer >= 0.3f)
+        {
+            monsterMoveTimer = 0.0f;
+            updateMonsterMove();
+        }
+
+        if (monsterSpawnTimer >= 1.5f)
+        {
+            monsterSpawnTimer = 0.0f;
+            updateMonsterSpawn();
+        }
+
+        if (bulletShootTimer >= 0.15f)
+        {
+            bulletShootTimer = 0.0f;
+            updateBulletShoot();
+        }
 
         if (GameState::Get().waiting)
         {
             GameState::Get().waiting = false;
             GameState::Get().gameOver = true;
-
-            // 다시 그려야 할 영역 무효화
-            RedrawWindow(hWnd, NULL, NULL, RDW_INVALIDATE);
-            // 바로 업데이트
-            UpdateWindow(hWnd);
         }
     }
-    break;
-    default:
-        break;
-    }
-}
 
-void Game::render(HDC hdc, HINSTANCE hInst)
-{
-    // 로드
-    renderBegin(hdc, hInst);
-    // 그리기
-    renderPlay();
-    // 실제 화면 출력
-    BitBlt(hdc, 0, 0, width, height, back, 0, 0, SRCCOPY);
-    // 해제
-    renderEnd();
-}
-
-void Game::renderBegin(HDC hdc, HINSTANCE hInst)
-{
-    back = CreateCompatibleDC(hdc);
-    scr = CreateCompatibleDC(hdc);
-    bmp = CreateCompatibleBitmap(hdc, width, height);
-    originalBmp = (HBITMAP)SelectObject(back, bmp);
-
-    // 땅
-    groundBmp[0] = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_AISLE));
-    groundBmp[1] = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_BRICK));
-    // 
-    blackBmp = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_BLACK));
-    // UI 텍스터
-    uiTextBmp[0] = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_CH1));
-    uiTextBmp[1] = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_CH2));
-    uiTextBmp[2] = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_CH3));
-    uiTextBmp[3] = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_CH4));
-    uiTextBmp[4] = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_CH5));
-    uiTextBmp[5] = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_CH6));
-    uiTextBmp[6] = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_CH7));
-
-    // 플레이어
-    playerBmp[0] = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_GOAL));
-    playerBmp[1] = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_GOALLEFT));
-    playerBmp[2] = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_GOALRIGHT));
-    playerBmp[3] = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_GOALUP));
-    // 총
-    bulletBmp = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_BULLET));
-    // 몬스터
-    monsterBmp[0] = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_CHARACTER1));
-    monsterBmp[1] = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_CHARACTER2));
-    // 죽음
-    deadBmp = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_DEAD));
-}
-
-void Game::renderPlay()
-{
-    if (!GameState::Get().gameOver)
+    void Game::updateMonsterMove()
     {
-        for (int y = 0; y < n; ++y)
+        monster.move(m_hWnd);
+    }
+
+    void Game::updateMonsterSpawn()
+    {
+        monster.spawn();
+    }
+
+    void Game::updateBulletShoot()
+    {
+        player.shoot();
+    }
+
+    void Game::render()
+    {
+        renderBegin();
+        renderPlay();
+
+        BitBlt(m_hFrontDC, 0, 0, width, height, back, 0, 0, SRCCOPY);
+
+        renderEnd();
+    }
+
+    void Game::renderBegin()
+    {
+        back = CreateCompatibleDC(m_hFrontDC);
+        scr = CreateCompatibleDC(m_hFrontDC);
+
+        bmp = CreateCompatibleBitmap(m_hFrontDC, width, height);
+        originalBmp = static_cast<HBITMAP>(SelectObject(back, bmp));
+
+        HINSTANCE hInst = GetModuleHandle(nullptr);
+
+        groundBmp[0] = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_AISLE));
+        groundBmp[1] = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_BRICK));
+
+        blackBmp = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_BLACK));
+
+        uiTextBmp[0] = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_CH1));
+        uiTextBmp[1] = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_CH2));
+        uiTextBmp[2] = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_CH3));
+        uiTextBmp[3] = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_CH4));
+        uiTextBmp[4] = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_CH5));
+        uiTextBmp[5] = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_CH6));
+        uiTextBmp[6] = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_CH7));
+
+        playerBmp[0] = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_GOAL));
+        playerBmp[1] = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_GOALLEFT));
+        playerBmp[2] = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_GOALRIGHT));
+        playerBmp[3] = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_GOALUP));
+
+        bulletBmp = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_BULLET));
+
+        monsterBmp[0] = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_CHARACTER1));
+        monsterBmp[1] = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_CHARACTER2));
+
+        deadBmp = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_DEAD));
+    }
+
+    void Game::renderPlay()
+    {
+        if (!GameState::Get().gameOver)
         {
-            for (int x = 0; x < n; ++x)
+            for (int y = 0; y < n; ++y)
             {
-                HBITMAP tile = GameState::Get().grid[y][x] ? groundBmp[1] : groundBmp[0];
-                SelectObject(scr, tile);
-                BitBlt(back, x * cell, y * cell, cell, cell, scr, 0, 0, SRCCOPY);
-            }
-        }
-
-        if (!GameState::Get().waiting)
-        {
-            // 몬스터
-            HBITMAP mSprite = mFilp ? monsterBmp[0] : monsterBmp[1];
-            mFilp = !mFilp;
-            SelectObject(scr, mSprite);
-
-            for (const pair<int, POINT>& monster : GameState::Get().monsterPos)
-            {
-                POINT pos = monster.second;
-                BitBlt(back, pos.x * cell, pos.y * cell, cell, cell, scr, 0, 0, SRCCOPY);
+                for (int x = 0; x < n; ++x)
+                {
+                    HBITMAP tile = GameState::Get().grid[y][x] ? groundBmp[1] : groundBmp[0];
+                    SelectObject(scr, tile);
+                    BitBlt(back, x * cell, y * cell, cell, cell, scr, 0, 0, SRCCOPY);
+                }
             }
 
-            // 총알
-            SelectObject(scr, bulletBmp);
-            using It = list<pair<ShootDir, POINT>>::iterator;
-            for (It it = PlayerState::Get().gun.begin(); it != PlayerState::Get().gun.end();)
+            if (!GameState::Get().waiting)
             {
-                POINT bullet = it->second;
-                BitBlt(back, bullet.x * cell, bullet.y * cell, cell, cell, scr, 0, 0, SRCCOPY);
-                it = next(it);
-            }
+                HBITMAP mSprite = mFilp ? monsterBmp[0] : monsterBmp[1];
+                mFilp = !mFilp;
 
-            // 플레이어
-            if (PlayerState::Get().pHoriz)
-            {
-                HBITMAP pSprite = PlayerState::Get().pFilp ? playerBmp[1] : playerBmp[2];
-                SelectObject(scr, pSprite);
+                SelectObject(scr, mSprite);
+
+                for (const pair<int, POINT>& monster : GameState::Get().monsterPos)
+                {
+                    POINT pos = monster.second;
+                    BitBlt(back, pos.x * cell, pos.y * cell, cell, cell, scr, 0, 0, SRCCOPY);
+                }
+
+                SelectObject(scr, bulletBmp);
+
+                for (auto it = PlayerState::Get().gun.begin(); it != PlayerState::Get().gun.end(); ++it)
+                {
+                    POINT bullet = it->second;
+                    BitBlt(back, bullet.x * cell, bullet.y * cell, cell, cell, scr, 0, 0, SRCCOPY);
+                }
+
+                if (PlayerState::Get().pHoriz)
+                {
+                    HBITMAP pSprite = PlayerState::Get().pFilp ? playerBmp[1] : playerBmp[2];
+                    SelectObject(scr, pSprite);
+                }
+                else
+                {
+                    HBITMAP pSprite = PlayerState::Get().pVert ? playerBmp[3] : playerBmp[0];
+                    SelectObject(scr, pSprite);
+                }
+
+                BitBlt(
+                    back,
+                    PlayerState::Get().playerPos.x * cell,
+                    PlayerState::Get().playerPos.y * cell,
+                    cell,
+                    cell,
+                    scr,
+                    0,
+                    0,
+                    SRCCOPY
+                );
             }
             else
             {
-                HBITMAP pSprite = PlayerState::Get().pVert ? playerBmp[3] : playerBmp[0];
-                SelectObject(scr, pSprite);
+                SelectObject(scr, deadBmp);
+
+                for (const pair<int, POINT>& it : GameState::Get().monsterPos)
+                {
+                    POINT pos = it.second;
+                    BitBlt(back, pos.x * cell, pos.y * cell, cell, cell, scr, 0, 0, SRCCOPY);
+                }
+
+                SelectObject(scr, groundBmp[0]);
+
+                for (auto it = PlayerState::Get().gun.begin(); it != PlayerState::Get().gun.end(); ++it)
+                {
+                    POINT bullet = it->second;
+                    BitBlt(back, bullet.x * cell, bullet.y * cell, cell, cell, scr, 0, 0, SRCCOPY);
+                }
+
+                SelectObject(scr, deadBmp);
+
+                BitBlt(
+                    back,
+                    PlayerState::Get().playerPos.x * cell,
+                    PlayerState::Get().playerPos.y * cell,
+                    cell,
+                    cell,
+                    scr,
+                    0,
+                    0,
+                    SRCCOPY
+                );
             }
-            BitBlt(back, PlayerState::Get().playerPos.x * cell, PlayerState::Get().playerPos.y * cell, cell, cell, scr, 0, 0, SRCCOPY);
         }
         else
         {
-            // 몬스터 죽음
-            SelectObject(scr, deadBmp);
-            for (const pair<int, POINT>& it : GameState::Get().monsterPos)
+            SelectObject(scr, blackBmp);
+
+            for (int y = 0; y < n; ++y)
             {
-                POINT pos = it.second;
-                BitBlt(back, pos.x * cell, pos.y * cell, cell, cell, scr, 0, 0, SRCCOPY);
+                for (int x = 0; x < n; ++x)
+                {
+                    BitBlt(back, x * cell, y * cell, cell, cell, scr, 0, 0, SRCCOPY);
+                }
             }
 
-            // 총알 지우기
-            SelectObject(scr, groundBmp[0]);
-            using It = list<pair<ShootDir, POINT>>::iterator;
-            for (It it = PlayerState::Get().gun.begin(); it != PlayerState::Get().gun.end();)
+            for (int i = 0; i < static_cast<int>(uiSpawn.size()); ++i)
             {
-                POINT bullet = it->second;
-                BitBlt(back, bullet.x * cell, bullet.y * cell, cell, cell, scr, 0, 0, SRCCOPY);
-                it = next(it);
-            }
+                if (i < 5)
+                    SelectObject(scr, uiTextBmp[i]);
+                else if (i == 5)
+                    SelectObject(scr, uiTextBmp[3]);
+                else
+                    SelectObject(scr, uiTextBmp[i - 1]);
 
-            // 플레이어 죽음
-            SelectObject(scr, deadBmp);
-            BitBlt(back, PlayerState::Get().playerPos.x * cell, PlayerState::Get().playerPos.y * cell, cell, cell, scr, 0, 0, SRCCOPY);
-        }
-    }
-    else
-    {
-        for (int y = 0; y < n; ++y)
-        {
-            for (int x = 0; x < n; ++x)
-            {
-                SelectObject(scr, blackBmp);
+                int x = uiSpawn[i].x;
+                int y = uiSpawn[i].y;
+
                 BitBlt(back, x * cell, y * cell, cell, cell, scr, 0, 0, SRCCOPY);
             }
         }
-
-        for (int i = 0; i < uiSpawn.size(); ++i)
-        {
-            if (i < 5)
-            {
-                SelectObject(scr, uiTextBmp[i]);
-            }
-            else if (i == 5) 
-            {
-                SelectObject(scr, uiTextBmp[3]);
-            }
-            else if (i > 5)
-            {
-                SelectObject(scr, uiTextBmp[i - 1]);
-            }
-
-            int x = uiSpawn[i].x;
-            int y = uiSpawn[i].y;
-            BitBlt(back, x * cell, y * cell, cell, cell, scr, 0, 0, SRCCOPY);
-        }
     }
-}
 
-void Game::renderEnd()
-{
-    // 메모리 누수 방지
-    SelectObject(back, originalBmp);
-    // 메모리 해제
-    for (int i = 0; i < 2; ++i)
+    void Game::renderEnd()
     {
-        DeleteObject(groundBmp[i]);
+        SelectObject(back, originalBmp);
+
+        for (int i = 0; i < 2; ++i)
+            DeleteObject(groundBmp[i]);
+
+        DeleteObject(blackBmp);
+
+        for (int i = 0; i < 7; ++i)
+            DeleteObject(uiTextBmp[i]);
+
+        for (int i = 0; i < 4; ++i)
+            DeleteObject(playerBmp[i]);
+
+        DeleteObject(bulletBmp);
+
+        for (int i = 0; i < 2; ++i)
+            DeleteObject(monsterBmp[i]);
+
+        DeleteObject(deadBmp);
+
+        DeleteObject(bmp);
+
+        DeleteDC(back);
+        DeleteDC(scr);
+
+        back = nullptr;
+        scr = nullptr;
+        bmp = nullptr;
+        originalBmp = nullptr;
     }
 
-    DeleteObject(blackBmp);
-
-    for (int i = 0; i < 7; ++i) 
+    void Game::OnResize(int width, int height)
     {
-        DeleteObject(uiTextBmp[i]);
+        IWndBase::OnResize(width, height);
+
+        this->width = width;
+        this->height = height;
     }
 
-    for (int i = 0; i < 4; ++i) 
+    void Game::OnClose()
     {
-        DeleteObject(playerBmp[i]);
+        isRun = false;
     }
-
-    DeleteObject(bulletBmp);
-
-    for (int i = 0; i < 2; ++i) 
-    {
-        DeleteObject(monsterBmp[i]);
-    }
-
-    DeleteObject(deadBmp);
-    /////////////////
-    DeleteObject(bmp);
-    DeleteObject(originalBmp);
-    DeleteDC(back);
-    DeleteDC(scr);
 }

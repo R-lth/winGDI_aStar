@@ -21,9 +21,6 @@
     <ClInclude Include="framework\Resource.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="framework\WinAPI.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="framework\Setting.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
@@ -57,11 +54,14 @@
     <ClInclude Include="content\Monster.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="framework\wndBase.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="framework\inc_windows.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="framework\WinAPI.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="content\AStar.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
@@ -74,7 +74,10 @@
     <ClCompile Include="content\Monster.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="main.cpp">
+    <ClCompile Include="content\main.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="framework\wndBase.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
