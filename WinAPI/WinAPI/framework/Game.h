@@ -2,8 +2,8 @@
 
 #include <random>
 #include "pch.h"
-#include "Player.h"
-#include "Monster.h"
+#include "../content/Player.h"
+#include "../content/Monster.h"
 
 using namespace std;
 

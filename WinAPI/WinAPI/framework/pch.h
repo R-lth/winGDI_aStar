@@ -13,6 +13,6 @@
 //
 #include "Types.h"
 #include "Setting.h"
-#include "GameState.h"
-#include "PlayerState.h"
-#include "AStar.h"
+#include "../content/GameState.h"
+#include "../content/PlayerState.h"
+#include "../content/AStar.h"

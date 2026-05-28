@@ -125,52 +125,53 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="AStar.h" />
-    <ClInclude Include="framework.h" />
-    <ClInclude Include="Game.h" />
-    <ClInclude Include="GameState.h" />
-    <ClInclude Include="Monster.h" />
-    <ClInclude Include="pch.h" />
-    <ClInclude Include="Player.h" />
-    <ClInclude Include="PlayerState.h" />
-    <ClInclude Include="Resource.h" />
-    <ClInclude Include="Setting.h" />
-    <ClInclude Include="Singleton.h" />
-    <ClInclude Include="targetver.h" />
-    <ClInclude Include="Types.h" />
-    <ClInclude Include="WinAPI.h" />
+    <ClInclude Include="content\AStar.h" />
+    <ClInclude Include="framework\framework.h" />
+    <ClInclude Include="framework\Game.h" />
+    <ClInclude Include="content\GameState.h" />
+    <ClInclude Include="content\Monster.h" />
+    <ClInclude Include="framework\pch.h" />
+    <ClInclude Include="content\Player.h" />
+    <ClInclude Include="content\PlayerState.h" />
+    <ClInclude Include="framework\Resource.h" />
+    <ClInclude Include="framework\Setting.h" />
+    <ClInclude Include="framework\Singleton.h" />
+    <ClInclude Include="framework\targetver.h" />
+    <ClInclude Include="framework\Types.h" />
+    <ClInclude Include="framework\WinAPI.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="AStar.cpp" />
-    <ClCompile Include="Game.cpp" />
-    <ClCompile Include="Monster.cpp" />
-    <ClCompile Include="Player.cpp" />
-    <ClCompile Include="WinAPI.cpp" />
+    <ClCompile Include="content\AStar.cpp" />
+    <ClCompile Include="framework\Game.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="content\Monster.cpp" />
+    <ClCompile Include="content\Player.cpp" />
+    <ClCompile Include="framework\WinAPI.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="WinAPI.rc" />
+    <ResourceCompile Include="resource\WinAPI.rc" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="black.bmp" />
-    <Image Include="ch1.bmp" />
-    <Image Include="ch2.bmp" />
-    <Image Include="ch3.bmp" />
-    <Image Include="ch4.bmp" />
-    <Image Include="ch6.bmp" />
-    <Image Include="ch7.bmp" />
-    <Image Include="ch5.bmp" />
-    <Image Include="dead.bmp" />
-    <Image Include="goal.bmp" />
-    <Image Include="character1.bmp" />
-    <Image Include="brick.bmp" />
-    <Image Include="character2.bmp" />
-    <Image Include="aisle.bmp" />
-    <Image Include="goalleft.bmp" />
-    <Image Include="goalright.bmp" />
-    <Image Include="goalup.bmp" />
-    <Image Include="bullet.bmp" />
-    <Image Include="small.ico" />
-    <Image Include="WinAPI.ico" />
+    <Image Include="resource\aisle.bmp" />
+    <Image Include="resource\black.bmp" />
+    <Image Include="resource\brick.bmp" />
+    <Image Include="resource\bullet.bmp" />
+    <Image Include="resource\ch1.bmp" />
+    <Image Include="resource\ch2.bmp" />
+    <Image Include="resource\ch3.bmp" />
+    <Image Include="resource\ch4.bmp" />
+    <Image Include="resource\ch5.bmp" />
+    <Image Include="resource\ch6.bmp" />
+    <Image Include="resource\ch7.bmp" />
+    <Image Include="resource\character1.bmp" />
+    <Image Include="resource\character2.bmp" />
+    <Image Include="resource\dead.bmp" />
+    <Image Include="resource\goal.bmp" />
+    <Image Include="resource\goalleft.bmp" />
+    <Image Include="resource\goalright.bmp" />
+    <Image Include="resource\goalup.bmp" />
+    <Image Include="resource\small.ico" />
+    <Image Include="resource\WinAPI.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
