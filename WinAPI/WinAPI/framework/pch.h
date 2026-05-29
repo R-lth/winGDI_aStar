@@ -12,7 +12,6 @@
 
 //
 #include "Types.h"
-#include "Setting.h"
 #include "../content/GameState.h"
 #include "../content/PlayerState.h"
 #include "../content/AStar.h"

@@ -21,9 +21,6 @@
     <ClInclude Include="framework\Resource.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="framework\Setting.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="framework\Types.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>

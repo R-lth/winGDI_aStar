@@ -3,6 +3,21 @@
 
 namespace monkeyEngine
 {
+    // 가상 함수 재정의
+    void Game::OnResize(int width, int height)
+    {
+        __super::OnResize(width, height);
+    }
+
+    void Game::OnClose()
+    {
+        ReleaseDC(m_hWnd, m_hFrontDC);
+        m_hFrontDC = nullptr;
+
+        __super::Destroy();
+    }
+
+    // 게임 로직
     void Game::Run()
     {
         init();
@@ -27,20 +42,16 @@ namespace monkeyEngine
             float deltaTime = static_cast<float>(currentTime - previousTime) /
                                static_cast<float>(frequency.QuadPart);
 
-            if (deltaTime < 1.f / 120.f) { continue; }
+            if (deltaTime < 1.f / 120.f) { continue; } // 프레임 안정화
             previousTime = currentTime;
 
             if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) // 메세지 큐 처리
             {
-                if (msg.message == WM_QUIT)
-                {
-                    isRun = false;
-                    break;
-                }
+                if (msg.message == WM_QUIT) { isRun = false; }
                 TranslateMessage(&msg);
                 DispatchMessage(&msg);
             }
-            else // 메세지가 없을 경우 게임 업데이트
+            else if (!GameState::Get().gameOver && !GameState::Get().waiting) // 메세지가 없을 경우 게임 업데이트
             {
                 input();
                 update(deltaTime);
@@ -53,13 +64,15 @@ namespace monkeyEngine
 
     void Game::init()
     {
-        Create(L"kohmeso", L"Client", 400, 400);
+        const wchar_t* className = L"Game";
+        const wchar_t* windowName = L"Client";
+
+        if (false == __super::Create(className, windowName, m_width, m_height/*todo*/)) { return; }
 
         RECT rcClient = {};
         GetClientRect(m_hWnd, &rcClient);
-
-        width = rcClient.right - rcClient.left;
-        height = rcClient.bottom - rcClient.top;
+        // m_width = rcClient.right - rcClient.left;
+        // m_height = rcClient.bottom - rcClient.top;
 
         m_hFrontDC = GetDC(m_hWnd);
 
@@ -68,8 +81,6 @@ namespace monkeyEngine
 
     void Game::input()
     {
-        if (GameState::Get().gameOver || GameState::Get().waiting) { return; }
-
         wasd[0] = GetAsyncKeyState('W') & 0x8000;
         wasd[1] = GetAsyncKeyState('A') & 0x8000;
         wasd[2] = GetAsyncKeyState('S') & 0x8000;
@@ -122,7 +133,7 @@ namespace monkeyEngine
         renderBegin();
         renderPlay();
 
-        BitBlt(m_hFrontDC, 0, 0, width, height, back, 0, 0, SRCCOPY);
+        BitBlt(m_hFrontDC, 0, 0, m_width, m_height, back, 0, 0, SRCCOPY);
 
         renderEnd();
     }
@@ -132,7 +143,7 @@ namespace monkeyEngine
         back = CreateCompatibleDC(m_hFrontDC);
         scr = CreateCompatibleDC(m_hFrontDC);
 
-        bmp = CreateCompatibleBitmap(m_hFrontDC, width, height);
+        bmp = CreateCompatibleBitmap(m_hFrontDC, m_width, m_height);
         originalBmp = static_cast<HBITMAP>(SelectObject(back, bmp));
 
         HINSTANCE hInst = GetModuleHandle(nullptr);
@@ -314,24 +325,5 @@ namespace monkeyEngine
         scr = nullptr;
         bmp = nullptr;
         originalBmp = nullptr;
-    }
-
-    // todo.
-    void Game::OnResize(int width, int height)
-    {
-        IWndBase::OnResize(width, height);
-
-        this->width = width;
-        this->height = height;
-    }
-
-    void Game::OnClose()
-    {
-        isRun = false;
-
-        ReleaseDC(m_hWnd, m_hFrontDC);
-        m_hFrontDC = nullptr;
-
-        Destroy();
     }
 }

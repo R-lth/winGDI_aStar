@@ -9,11 +9,18 @@
 
 namespace monkeyEngine
 {
-    class Game : protected IWndBase
+    class Game : private IWndBase
     {
     public:
         Game() = default;
         ~Game() override = default;
+
+        // 복사 생성자, 대입 불가
+        Game(const Game&) = delete;
+        Game& operator=(const Game&) = delete;
+        // 이동 생성자, 대입 불가
+        Game(Game&&) = delete;
+        Game& operator=(Game&&) = delete;
 
         void Run();
 
@@ -26,10 +33,6 @@ namespace monkeyEngine
         void input();
         void update(float deltaTime);
         void render();
-
-        void updateMonsterMove();
-        void updateMonsterSpawn();
-        void updateBulletShoot();
 
         void renderBegin();
         void renderPlay();
@@ -56,9 +59,6 @@ namespace monkeyEngine
         HBITMAP deadBmp = nullptr;
 
     private:
-        int width = 400;
-        int height = 400;
-
         const int cell = 20;
         const int n = 20;
 
@@ -70,9 +70,9 @@ namespace monkeyEngine
         };
 
         bool mFilp = false;
-        bool isRun = true;
         bool wasd[4] = {};
         bool arrow[4] = {};
+        bool isRun = true;
 
     private:
         HDC m_hFrontDC = nullptr;
