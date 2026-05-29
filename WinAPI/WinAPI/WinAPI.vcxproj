@@ -125,15 +125,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="content\AStar.h" />
+    <ClInclude Include="framework\AStar.h" />
     <ClInclude Include="framework\framework.h" />
     <ClInclude Include="framework\Game.h" />
     <ClInclude Include="framework\GameState.h" />
-    <ClInclude Include="content\Monster.h" />
     <ClInclude Include="framework\inc_windows.h" />
+    <ClInclude Include="framework\Monster.h" />
     <ClInclude Include="framework\pch.h" />
-    <ClInclude Include="content\Player.h" />
-    <ClInclude Include="content\PlayerState.h" />
+    <ClInclude Include="framework\Player.h" />
+    <ClInclude Include="framework\PlayerState.h" />
     <ClInclude Include="framework\Resource.h" />
     <ClInclude Include="framework\Singleton.h" />
     <ClInclude Include="framework\targetver.h" />
@@ -141,12 +141,12 @@
     <ClInclude Include="framework\wndBase.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="content\AStar.cpp" />
+    <ClCompile Include="framework\AStar.cpp" />
     <ClCompile Include="framework\Game.cpp" />
-    <ClCompile Include="content\main.cpp" />
-    <ClCompile Include="content\Monster.cpp" />
-    <ClCompile Include="content\Player.cpp" />
+    <ClCompile Include="framework\Monster.cpp" />
+    <ClCompile Include="framework\Player.cpp" />
     <ClCompile Include="framework\wndBase.cpp" />
+    <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource\WinAPI.rc" />

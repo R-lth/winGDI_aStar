@@ -15,5 +15,5 @@
 #include "GameState.h"
 
 // todo.
-#include "../content/PlayerState.h"
-#include "../content/AStar.h"
+#include "PlayerState.h"
+#include "AStar.h"
