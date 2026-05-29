@@ -28,15 +28,14 @@ namespace monkeyEngine
         void OnResize(int width, int height) override;
         void OnClose() override;
 
+        void renderDataLoad();
+        void renderDataRelease();
+
     private:
         void init();
         void input();
         void update(float deltaTime);
         void render();
-
-        void renderBegin();
-        void renderPlay();
-        void renderEnd();
 
     private:
         bool isRun = true;
@@ -46,13 +45,12 @@ namespace monkeyEngine
     private:
         // todo.
         HDC m_hFrontDC = nullptr;
-        HDC back = nullptr;
-        HDC scr = nullptr;
+        HDC m_hBackDC = nullptr;
+        HDC m_hSrcDC = nullptr;
+        HBITMAP m_hBackBitmap = nullptr;
+        HBITMAP m_hDefaultBitmap = nullptr;
 
     private:
-        HBITMAP bmp = nullptr;
-        HBITMAP originalBmp = nullptr;
-
         HBITMAP groundBmp[2] = {};
         HBITMAP blackBmp = nullptr;
         HBITMAP uiTextBmp[7] = {};
