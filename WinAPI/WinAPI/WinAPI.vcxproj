@@ -135,7 +135,6 @@
     <ClInclude Include="content\Player.h" />
     <ClInclude Include="content\PlayerState.h" />
     <ClInclude Include="framework\Resource.h" />
-    <ClInclude Include="framework\Setting.h" />
     <ClInclude Include="framework\Singleton.h" />
     <ClInclude Include="framework\targetver.h" />
     <ClInclude Include="framework\Types.h" />

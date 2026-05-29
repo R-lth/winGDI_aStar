@@ -9,11 +9,18 @@
 
 namespace monkeyEngine
 {
-    class Game : protected IWndBase
+    class Game : private IWndBase
     {
     public:
         Game() = default;
         ~Game() override = default;
+
+        // 복사 생성자, 대입 불가
+        Game(const Game&) = delete;
+        Game& operator=(const Game&) = delete;
+        // 이동 생성자, 대입 불가
+        Game(Game&&) = delete;
+        Game& operator=(Game&&) = delete;
 
         void Run();
 
@@ -21,31 +28,29 @@ namespace monkeyEngine
         void OnResize(int width, int height) override;
         void OnClose() override;
 
+        void renderDataLoad();
+        void renderDataRelease();
+
     private:
         void init();
         void input();
         void update(float deltaTime);
         void render();
 
-        void updateMonsterMove();
-        void updateMonsterSpawn();
-        void updateBulletShoot();
-
-        void renderBegin();
-        void renderPlay();
-        void renderEnd();
+    private:
+        bool isRun = true;
+        bool wasd[4] = {};
+        bool arrow[4] = {};
+        
+    private:
+        // todo.
+        HDC m_hFrontDC = nullptr;
+        HDC m_hBackDC = nullptr;
+        HDC m_hSrcDC = nullptr;
+        HBITMAP m_hBackBitmap = nullptr;
+        HBITMAP m_hDefaultBitmap = nullptr;
 
     private:
-        Player player;
-        Monster monster;
-        AStar aStar;
-
-    private:
-        HDC back = nullptr;
-        HDC scr = nullptr;
-        HBITMAP bmp = nullptr;
-        HBITMAP originalBmp = nullptr;
-
         HBITMAP groundBmp[2] = {};
         HBITMAP blackBmp = nullptr;
         HBITMAP uiTextBmp[7] = {};
@@ -56,11 +61,16 @@ namespace monkeyEngine
         HBITMAP deadBmp = nullptr;
 
     private:
-        int width = 400;
-        int height = 400;
+        float timer = 0.f;
 
-        const int cell = 20;
-        const int n = 20;
+    private:
+        Player player;
+        Monster monster;
+        AStar aStar;
+
+    private:
+        static const int cell = 20;
+        static const int n = 20;
 
         const vector<POINT> uiSpawn
         {
@@ -70,14 +80,6 @@ namespace monkeyEngine
         };
 
         bool mFilp = false;
-        bool isRun = true;
-
-    private:
-        HDC m_hFrontDC = nullptr;
-
-        float monsterMoveTimer = 0.0f;
-        float monsterSpawnTimer = 0.0f;
-        float bulletShootTimer = 0.0f;
     };
 }
 
