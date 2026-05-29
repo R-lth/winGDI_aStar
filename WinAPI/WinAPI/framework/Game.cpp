@@ -5,7 +5,55 @@ namespace monkeyEngine
 {
     void Game::Run()
     {
-        Create(L"GameWindowClass", L"Client", 400, 400);
+        init();
+
+        MSG msg = {};
+
+        LARGE_INTEGER frequency;
+        QueryPerformanceFrequency(&frequency);
+        LARGE_INTEGER count;
+        QueryPerformanceCounter(&count);
+
+        __int64 currentTime, previousTime;
+        currentTime = count.QuadPart;
+        previousTime = currentTime;
+
+        float deltaTime = 0.f;
+
+        while (isRun)
+        {
+            QueryPerformanceCounter(&count);
+            currentTime = count.QuadPart;
+            float deltaTime = static_cast<float>(currentTime - previousTime) /
+                               static_cast<float>(frequency.QuadPart);
+
+            if (deltaTime < 1.f / 120.f) { continue; }
+            previousTime = currentTime;
+
+            if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) // 메세지 큐 처리
+            {
+                if (msg.message == WM_QUIT)
+                {
+                    isRun = false;
+                    break;
+                }
+                TranslateMessage(&msg);
+                DispatchMessage(&msg);
+            }
+            else // 메세지가 없을 경우 게임 업데이트
+            {
+                input();
+                update(deltaTime);
+                render();
+            }
+        }
+
+        OnClose();
+    }
+
+    void Game::init()
+    {
+        Create(L"kohmeso", L"Client", 400, 400);
 
         RECT rcClient = {};
         GetClientRect(m_hWnd, &rcClient);
@@ -15,87 +63,31 @@ namespace monkeyEngine
 
         m_hFrontDC = GetDC(m_hWnd);
 
-        init();
-
-        LARGE_INTEGER frequency = {};
-        LARGE_INTEGER previousCount = {};
-        LARGE_INTEGER currentCount = {};
-
-        QueryPerformanceFrequency(&frequency);
-        QueryPerformanceCounter(&previousCount);
-
-        MSG msg = {};
-
-        while (isRun)
-        {
-            while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
-            {
-                if (msg.message == WM_QUIT)
-                {
-                    isRun = false;
-                    break;
-                }
-
-                TranslateMessage(&msg);
-                DispatchMessage(&msg);
-            }
-
-            QueryPerformanceCounter(&currentCount);
-
-            float deltaTime =
-                static_cast<float>(currentCount.QuadPart - previousCount.QuadPart) /
-                static_cast<float>(frequency.QuadPart);
-
-            if (deltaTime < 1.0f / 120.0f)
-                continue;
-
-            previousCount = currentCount;
-
-            input();
-            update(deltaTime);
-            render();
-        }
-
-        ReleaseDC(m_hWnd, m_hFrontDC);
-        m_hFrontDC = nullptr;
-
-        Destroy();
-    }
-
-    void Game::init()
-    {
         srand(static_cast<unsigned int>(time(nullptr)));
     }
 
     void Game::input()
     {
-        if (GameState::Get().gameOver || GameState::Get().waiting)
-            return;
+        if (GameState::Get().gameOver || GameState::Get().waiting) { return; }
 
-        bool wasd[4] = {};
         wasd[0] = GetAsyncKeyState('W') & 0x8000;
         wasd[1] = GetAsyncKeyState('A') & 0x8000;
         wasd[2] = GetAsyncKeyState('S') & 0x8000;
         wasd[3] = GetAsyncKeyState('D') & 0x8000;
 
-        bool arrow[4] = {};
         arrow[0] = GetAsyncKeyState(VK_UP) & 0x8000;
         arrow[1] = GetAsyncKeyState(VK_LEFT) & 0x8000;
         arrow[2] = GetAsyncKeyState(VK_DOWN) & 0x8000;
         arrow[3] = GetAsyncKeyState(VK_RIGHT) & 0x8000;
 
-        if (wasd[0] || wasd[1] || wasd[2] || wasd[3])
-            player.move(wasd);
-
-        if (arrow[0] || arrow[1] || arrow[2] || arrow[3])
-            player.loadingBullets(arrow);
-
-        if (GetAsyncKeyState(VK_ESCAPE) & 0x8000)
-            isRun = false;
+        if (GetAsyncKeyState(VK_ESCAPE) & 0x8000) { isRun = false; }
     }
 
     void Game::update(float deltaTime)
     {
+        if (wasd[0] || wasd[1] || wasd[2] || wasd[3]) { player.move(wasd); }
+        if (arrow[0] || arrow[1] || arrow[2] || arrow[3]) { player.loadingBullets(arrow); }
+
         monsterMoveTimer += deltaTime;
         monsterSpawnTimer += deltaTime;
         bulletShootTimer += deltaTime;
@@ -103,19 +95,19 @@ namespace monkeyEngine
         if (monsterMoveTimer >= 0.3f)
         {
             monsterMoveTimer = 0.0f;
-            updateMonsterMove();
+            monster.move(m_hWnd);
         }
 
         if (monsterSpawnTimer >= 1.5f)
         {
             monsterSpawnTimer = 0.0f;
-            updateMonsterSpawn();
+            monster.spawn();
         }
 
         if (bulletShootTimer >= 0.15f)
         {
             bulletShootTimer = 0.0f;
-            updateBulletShoot();
+            player.shoot();
         }
 
         if (GameState::Get().waiting)
@@ -123,21 +115,6 @@ namespace monkeyEngine
             GameState::Get().waiting = false;
             GameState::Get().gameOver = true;
         }
-    }
-
-    void Game::updateMonsterMove()
-    {
-        monster.move(m_hWnd);
-    }
-
-    void Game::updateMonsterSpawn()
-    {
-        monster.spawn();
-    }
-
-    void Game::updateBulletShoot()
-    {
-        player.shoot();
     }
 
     void Game::render()
@@ -339,6 +316,7 @@ namespace monkeyEngine
         originalBmp = nullptr;
     }
 
+    // todo.
     void Game::OnResize(int width, int height)
     {
         IWndBase::OnResize(width, height);
@@ -350,5 +328,10 @@ namespace monkeyEngine
     void Game::OnClose()
     {
         isRun = false;
+
+        ReleaseDC(m_hWnd, m_hFrontDC);
+        m_hFrontDC = nullptr;
+
+        Destroy();
     }
 }

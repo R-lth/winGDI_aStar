@@ -71,6 +71,8 @@ namespace monkeyEngine
 
         bool mFilp = false;
         bool isRun = true;
+        bool wasd[4] = {};
+        bool arrow[4] = {};
 
     private:
         HDC m_hFrontDC = nullptr;
