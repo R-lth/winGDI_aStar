@@ -122,7 +122,7 @@ namespace monkeyEngine
                 TranslateMessage(&msg);
                 DispatchMessage(&msg);
             }
-            else if (!GameState::Get().gameOver && !GameState::Get().waiting) // 메세지가 없을 경우 게임 업데이트
+            else // 메세지가 없을 경우 게임 업데이트
             {
                 input();
                 update(deltaTime);
@@ -172,35 +172,50 @@ namespace monkeyEngine
 
     void Game::update(float deltaTime)
     {
-        if (wasd[0] || wasd[1] || wasd[2] || wasd[3]) { player.move(wasd); }
-        if (arrow[0] || arrow[1] || arrow[2] || arrow[3]) { player.loadingBullets(arrow); }
+        timer0 += deltaTime;
+        timer1 += deltaTime;
+        timer2 += deltaTime;
+        timer3 += deltaTime;
 
-        timer += deltaTime;
-
-        if (timer >= 0.15f)
+        if (timer0 >= 0.05f) 
         {
-            // 
+            if (wasd[0] || wasd[1] || wasd[2] || wasd[3]) { player.move(wasd); }
+            if (arrow[0] || arrow[1] || arrow[2] || arrow[3]) { player.loadingBullets(arrow); }
+
+            timer0 = 0.f;
+        }
+
+        if (timer1 >= 0.15f)
+        {
             player.shoot();
-            monster.move(m_hWnd);
-            monster.spawn();
 
-            timer = 0.f;
+            timer1 = 0.f;
         }
 
-        /*if (timer >= 0.3f)
+        if (timer2 >= 0.3f)
         {
             monster.move(m_hWnd);
+
+            timer2 = 0.f;
         }
 
-        if (timer >= 1.5f)
+        if (timer3 >= 1.5f)
         {
             monster.spawn();
-        }*/
+
+            timer3 = 0.f;
+        }
 
         if (GameState::Get().waiting)
         {
-            GameState::Get().waiting = false;
-            GameState::Get().gameOver = true;
+            deathSceneTimer += deltaTime;
+
+            if (deathSceneTimer >= 1.5f)
+            {
+                GameState::Get().waiting = false;
+                GameState::Get().gameOver = true;
+                deathSceneTimer = 0.f; 
+            }
         }
     }
 

@@ -43,7 +43,11 @@ namespace monkeyEngine
         bool arrow[4] = {};
         
     private:
-        float timer = 0.f;
+        float timer0 = 0.f;
+        float timer1 = 0.f;
+        float timer2 = 0.f;
+        float timer3 = 0.f;
+        float deathSceneTimer = 0.f;
 
     private:
         // todo. 액터 단위로
