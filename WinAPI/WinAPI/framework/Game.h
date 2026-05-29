@@ -43,10 +43,21 @@ namespace monkeyEngine
         bool arrow[4] = {};
         
     private:
-        // todo.
+        float timer = 0.f;
+
+    private:
+        // todo. 액터 단위로
+        Player player;
+        Monster monster;
+        AStar aStar;
+        bool mFilp = false;
+
+    private:
         HDC m_hFrontDC = nullptr;
         HDC m_hBackDC = nullptr;
         HDC m_hSrcDC = nullptr;
+
+    private:
         HBITMAP m_hBackBitmap = nullptr;
         HBITMAP m_hDefaultBitmap = nullptr;
 
@@ -61,14 +72,6 @@ namespace monkeyEngine
         HBITMAP deadBmp = nullptr;
 
     private:
-        float timer = 0.f;
-
-    private:
-        Player player;
-        Monster monster;
-        AStar aStar;
-
-    private:
         static const int cell = 20;
         static const int n = 20;
 
@@ -78,8 +81,6 @@ namespace monkeyEngine
             {10, 7}, {11, 7},
             {10, 8}, {11, 8}
         };
-
-        bool mFilp = false;
     };
 }
 

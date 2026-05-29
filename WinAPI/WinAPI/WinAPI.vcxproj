@@ -128,7 +128,7 @@
     <ClInclude Include="content\AStar.h" />
     <ClInclude Include="framework\framework.h" />
     <ClInclude Include="framework\Game.h" />
-    <ClInclude Include="content\GameState.h" />
+    <ClInclude Include="framework\GameState.h" />
     <ClInclude Include="content\Monster.h" />
     <ClInclude Include="framework\inc_windows.h" />
     <ClInclude Include="framework\pch.h" />
