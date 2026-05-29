@@ -26,14 +26,18 @@ private:
     void OnResize(int width, int height) override;
     void OnClose() override;
 
-    void renderDataLoad();
-    void renderDataRelease();
-
 private:
     void init();
     void input();
     void update(float deltaTime);
     void render();
+
+private:
+    void renderDataLoad();
+    void renderDataRelease();
+    void renderInGame();
+    void renderSpakle();
+    void renderGameOver();
 
 private:
     bool isRun = true;
@@ -48,7 +52,6 @@ private:
     float deathSceneTimer = 0.f;
 
 private:
-    // todo. 액터 단위로
     Player player;
     Monster monster;
     AStar aStar;
