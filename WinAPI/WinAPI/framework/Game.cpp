@@ -66,11 +66,10 @@ namespace monkeyEngine
     {
         const wchar_t* className = L"Game";
         const wchar_t* windowName = L"Client";
+        if (false == __super::Create(className, windowName, m_width, m_height)) { return; }
 
-        if (false == __super::Create(className, windowName, m_width, m_height/*todo*/)) { return; }
-
-        RECT rcClient = {};
-        GetClientRect(m_hWnd, &rcClient);
+        RECT rect = {};
+        GetClientRect(m_hWnd, &rect);
         // m_width = rcClient.right - rcClient.left;
         // m_height = rcClient.bottom - rcClient.top;
 
@@ -99,26 +98,24 @@ namespace monkeyEngine
         if (wasd[0] || wasd[1] || wasd[2] || wasd[3]) { player.move(wasd); }
         if (arrow[0] || arrow[1] || arrow[2] || arrow[3]) { player.loadingBullets(arrow); }
 
-        monsterMoveTimer += deltaTime;
-        monsterSpawnTimer += deltaTime;
-        bulletShootTimer += deltaTime;
+        timer += deltaTime;
 
-        if (monsterMoveTimer >= 0.3f)
+        if (timer >= 0.3f)
         {
-            monsterMoveTimer = 0.0f;
             monster.move(m_hWnd);
         }
 
-        if (monsterSpawnTimer >= 1.5f)
+        if (timer >= 1.5f)
         {
-            monsterSpawnTimer = 0.0f;
             monster.spawn();
         }
 
-        if (bulletShootTimer >= 0.15f)
+        if (timer >= 0.15f)
         {
-            bulletShootTimer = 0.0f;
+            
             player.shoot();
+
+            timer = 0.f;
         }
 
         if (GameState::Get().waiting)

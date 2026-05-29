@@ -39,13 +39,17 @@ namespace monkeyEngine
         void renderEnd();
 
     private:
-        Player player;
-        Monster monster;
-        AStar aStar;
-
+        bool isRun = true;
+        bool wasd[4] = {};
+        bool arrow[4] = {};
+        
     private:
+        // todo.
+        HDC m_hFrontDC = nullptr;
         HDC back = nullptr;
         HDC scr = nullptr;
+
+    private:
         HBITMAP bmp = nullptr;
         HBITMAP originalBmp = nullptr;
 
@@ -59,8 +63,16 @@ namespace monkeyEngine
         HBITMAP deadBmp = nullptr;
 
     private:
-        const int cell = 20;
-        const int n = 20;
+        float timer = 0.f;
+
+    private:
+        Player player;
+        Monster monster;
+        AStar aStar;
+
+    private:
+        static const int cell = 20;
+        static const int n = 20;
 
         const vector<POINT> uiSpawn
         {
@@ -70,16 +82,6 @@ namespace monkeyEngine
         };
 
         bool mFilp = false;
-        bool wasd[4] = {};
-        bool arrow[4] = {};
-        bool isRun = true;
-
-    private:
-        HDC m_hFrontDC = nullptr;
-
-        float monsterMoveTimer = 0.0f;
-        float monsterSpawnTimer = 0.0f;
-        float bulletShootTimer = 0.0f;
     };
 }
 
